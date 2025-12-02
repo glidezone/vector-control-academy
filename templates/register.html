@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Create account</h1>
+  <form method="post" class="form-card">
+    <label>Full name
+      <input type="text" name="name" required>
+    </label>
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    <label>Discord username
+      <input type="text" name="discord_tag" placeholder="user#1234" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <label>Repeat password
+      <input type="password" name="password2" required>
+    </label>
+    <button class="btn" type="submit">Register</button>
+  </form>
+{% endblock %}

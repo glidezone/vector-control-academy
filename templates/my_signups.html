@@ -1,0 +1,39 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>My training status</h1>
+  {% if not signups %}
+    <p>You have no registrations yet.</p>
+  {% else %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Status</th>
+          <th>Queue position</th>
+          <th>Mentor</th>
+          <th>Last updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in signups %}
+          <tr>
+            <td>{{ s.module.title }} ({{ s.module.code }})</td>
+            <td>{{ s.status }}</td>
+            <td>
+              {% if positions[s.id] %}#{{ positions[s.id] }}{% else %}-{% endif %}
+            </td>
+            <td>
+              {% if s.mentor %}
+                {{ s.mentor.full_name }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ s.last_updated.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

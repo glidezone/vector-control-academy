@@ -1,0 +1,75 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Training modules</h1>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Stage</th>
+        <th>Module</th>
+        <th>Description</th>
+        <th>Your status</th>
+        <th>Queue</th>
+        <th>ETA</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in modules %}
+        {% set s = user_signups.get(m.id) %}
+        <tr>
+          <td>{{ m.stage }}</td>
+          <td>{{ m.title }} ({{ m.code }})</td>
+          <td>{{ m.description }}</td>
+          <td>
+            {% if s %}
+              {{ s.status }}
+              {% if s.mentor %}
+                <br>Mentor: {{ s.mentor.full_name }} ({{ s.mentor.discord_tag }})
+              {% endif %}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            {% if positions.get(m.id) %}
+              #{{ positions[m.id] }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>{{ estimates[m.id] }}</td>
+          <td>
+            {% set perm = permissions[m.id] %}
+            {% if s and s.status == 'waiting' %}
+              <form method="post" action="{{ url_for('withdraw_module', module_id=m.id) }}">
+                <button class="btn-small" type="submit">Withdraw</button>
+              </form>
+            {% elif perm.allowed %}
+              <form method="post" action="{{ url_for('signup_module', module_id=m.id) }}">
+                <button class="btn-small" type="submit">Join queue</button>
+              </form>
+            {% else %}
+              <span class="hint">{{ perm.message }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if show_rating_prompt %}
+    <div class="panel info">
+      <p>You have completed all modules. You can now request your Vector Control Academy rating.</p>
+      <form method="post" action="{{ url_for('request_rating') }}">
+        <button class="btn" type="submit">Request rating</button>
+      </form>
+    </div>
+  {% elif rating_request %}
+    <div class="panel info">
+      <strong>Rating request status:</strong> {{ rating_request.status }}
+      {% if rating_request.admin_comment %}<br>{{ rating_request.admin_comment }}{% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

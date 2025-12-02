@@ -1,0 +1,43 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Create session report</h1>
+
+  <form method="post" class="form-card">
+    <label>Trainee
+      <select name="trainee_id" required>
+        <option value="">Select trainee</option>
+        {% for t in trainees %}
+          <option value="{{ t.id }}">{{ t.full_name }} ({{ t.discord_tag }})</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>Module (optional)
+      <select name="module_id">
+        <option value="">-</option>
+        {% for m in modules %}
+          <option value="{{ m.id }}">{{ m.title }} ({{ m.code }})</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>Subject
+      <input type="text" name="subject" required>
+    </label>
+
+    <label>Topic (optional)
+      <input type="text" name="topic">
+    </label>
+
+    <label>Grade (1–10, optional)
+      <input type="number" name="grade" min="1" max="10">
+    </label>
+
+    <label>Comment (optional)
+      <textarea name="comment" rows="4"></textarea>
+    </label>
+
+    <button class="btn" type="submit">Save report</button>
+  </form>
+{% endblock %}

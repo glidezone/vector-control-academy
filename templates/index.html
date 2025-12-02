@@ -1,0 +1,11 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Vector Control Academy</h1>
+  <p>Unique training management platform for Vector Control Academy trainees, mentors and staff.</p>
+  {% if not current_user.is_authenticated %}
+    <p><a class="btn" href="{{ url_for('register') }}">Get started</a></p>
+  {% else %}
+    <p><a class="btn" href="{{ url_for('modules_view') }}">Go to modules</a></p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,170 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Admin dashboard</h1>
+
+  <section class="stats">
+    <div class="stat-card">
+      <span class="stat-label">Users</span>
+      <span class="stat-value">{{ stats.total_users }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Modules</span>
+      <span class="stat-value">{{ stats.total_modules }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Signups</span>
+      <span class="stat-value">{{ stats.total_signups }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Pending ratings</span>
+      <span class="stat-value">{{ stats.pending_ratings }}</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Users</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Discord</th>
+          <th>Mentor</th>
+          <th>Admin</th>
+          <th>Rating awarded</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.full_name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.discord_tag }}</td>
+            <td>{{ "yes" if u.is_mentor else "no" }}</td>
+            <td>{{ "yes" if u.is_admin else "no" }}</td>
+            <td>{{ "yes" if u.rating_awarded else "no" }}</td>
+            <td>
+              <form method="post" action="{{ url_for('admin_toggle_mentor', user_id=u.id) }}">
+                <button class="btn-secondary" type="submit">
+                  {% if u.is_mentor %}Remove mentor{% else %}Make mentor{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Rating requests</h2>
+    {% if not rating_requests %}
+      <p>No rating requests.</p>
+    {% else %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Admin comment</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rating_requests %}
+            <tr>
+              <td>{{ r.user.full_name }} ({{ r.user.discord_tag }})</td>
+              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td>{{ r.status }}</td>
+              <td>{{ r.admin_comment or "-" }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin_update_rating_request', req_id=r.id) }}">
+                  <select name="status">
+                    <option value="pending" {% if r.status == "pending" %}selected{% endif %}>pending</option>
+                    <option value="approved" {% if r.status == "approved" %}selected{% endif %}>approved</option>
+                    <option value="denied" {% if r.status == "denied" %}selected{% endif %}>denied</option>
+                  </select>
+                  <input type="text" name="comment" placeholder="Admin comment" value="{{ r.admin_comment or '' }}">
+                  <button class="btn" type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Queues</h2>
+    {% if not signup_rows %}
+      <p>No signups yet.</p>
+    {% else %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Trainee</th>
+            <th>Status</th>
+            <th>Mentor</th>
+            <th>Queue pos</th>
+            <th>Joined</th>
+            <th>Update</th>
+            <th>Move</th>
+            <th>Kick</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in signup_rows %}
+            {% set s = row.signup %}
+            <tr>
+              <td>{{ row.module.title }} ({{ row.module.code }})</td>
+              <td>{{ row.user.full_name }} ({{ row.user.discord_tag }})</td>
+              <td>{{ s.status }}</td>
+              <td>
+                {% if s.mentor %}
+                  {{ s.mentor.full_name }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if row.position %}
+                  #{{ row.position }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>{{ s.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td>
+                <form method="post" action="{{ url_for('admin_update_signup_status', signup_id=s.id) }}">
+                  <select name="status">
+                    <option value="waiting" {% if s.status == "waiting" %}selected{% endif %}>waiting</option>
+                    <option value="completed" {% if s.status == "completed" %}selected{% endif %}>completed</option>
+                    <option value="failed" {% if s.status == "failed" %}selected{% endif %}>failed</option>
+                  </select>
+                  <input type="text" name="notes" placeholder="Note (optional)">
+                  <button class="btn" type="submit">Save</button>
+                </form>
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('admin_move_signup', signup_id=s.id) }}">
+                  <button class="btn-secondary" name="direction" value="up">Up</button>
+                  <button class="btn-secondary" name="direction" value="down">Down</button>
+                </form>
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('admin_kick_signup', signup_id=s.id) }}">
+                  <button class="btn-secondary" type="submit">Kick</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -1,0 +1,62 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Session reports</h1>
+
+  {% if current_user.is_admin or current_user.is_mentor %}
+    <p>
+      <a class="btn" href="{{ url_for('new_report') }}">Create report</a>
+    </p>
+    <form method="get" class="form-inline">
+      <label>Filter by trainee:
+        <select name="trainee_id" onchange="this.form.submit()">
+          <option value="">All trainees</option>
+          {% for t in trainees %}
+            <option value="{{ t.id }}" {% if request.args.get('trainee_id')|int == t.id %}selected{% endif %}>
+              {{ t.full_name }} ({{ t.discord_tag }})
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+    </form>
+  {% endif %}
+
+  {% if not reports %}
+    <p>No session reports yet.</p>
+  {% else %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Trainee</th>
+          <th>Mentor</th>
+          <th>Module</th>
+          <th>Subject</th>
+          <th>Topic</th>
+          <th>Grade</th>
+          <th>Comment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+          <tr>
+            <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+            <td>{{ r.trainee.full_name }} ({{ r.trainee.discord_tag }})</td>
+            <td>{{ r.mentor.full_name }} ({{ r.mentor.discord_tag }})</td>
+            <td>
+              {% if r.module %}
+                {{ r.module.title }} ({{ r.module.code }})
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ r.subject }}</td>
+            <td>{{ r.topic or "-" }}</td>
+            <td>{% if r.grade is not none %}{{ r.grade }}/10{% else %}-{% endif %}</td>
+            <td>{{ r.comment or "-" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

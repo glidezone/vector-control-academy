@@ -1,0 +1,101 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h1>Mentor dashboard</h1>
+
+  <section>
+    <h2>Your trainees</h2>
+    {% if not my_active %}
+      <p>No trainees assigned yet.</p>
+    {% else %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Trainee</th>
+            <th>Status</th>
+            <th>Last update</th>
+            <th>Notes</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in my_active %}
+            <tr>
+              <td>{{ s.module.title }} ({{ s.module.code }})</td>
+              <td>{{ s.user.full_name }} ({{ s.user.discord_tag }})</td>
+              <td>{{ s.status }}</td>
+              <td>{{ s.last_updated.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td><pre class="notes">{{ s.notes or "-" }}</pre></td>
+              <td>
+                <form method="post" action="{{ url_for('mentor_update', signup_id=s.id) }}">
+                  <label>Status
+                    <select name="status">
+                      <option value="waiting" {% if s.status == "waiting" %}selected{% endif %}>waiting</option>
+                      <option value="completed" {% if s.status == "completed" %}selected{% endif %}>completed</option>
+                      <option value="failed" {% if s.status == "failed" %}selected{% endif %}>failed</option>
+                    </select>
+                  </label>
+                  <label>Notes
+                    <textarea name="notes" rows="2"></textarea>
+                  </label>
+                  <button class="btn" type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Queues</h2>
+    {% for m in modules %}
+      <h3>{{ m.title }} ({{ m.code }})</h3>
+      {% set queue = module_queues[m.id] %}
+      {% if not queue %}
+        <p>No trainees waiting.</p>
+      {% else %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Trainee</th>
+              <th>Status</th>
+              <th>Mentor</th>
+              <th>Joined</th>
+              <th>Pick</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in queue %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ s.user.full_name }} ({{ s.user.discord_tag }})</td>
+                <td>{{ s.status }}</td>
+                <td>
+                  {% if s.mentor %}
+                    {{ s.mentor.full_name }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>{{ s.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td>
+                  {% if s.mentor_id and not current_user.is_admin %}
+                    Already assigned
+                  {% else %}
+                    <form method="post" action="{{ url_for('mentor_pick', signup_id=s.id) }}">
+                      <button class="btn" type="submit">Accept trainee</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    {% endfor %}
+  </section>
+{% endblock %}
