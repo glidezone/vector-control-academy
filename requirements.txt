@@ -3,3 +3,6 @@ Flask-SQLAlchemy
 Flask-Login
 Flask-Bcrypt
 Flask-Session
+gunicorn
+
+
