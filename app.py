@@ -1012,7 +1012,7 @@ def seed_modules_and_admin():
             is_admin=True,
             is_mentor=True,
         )
-        admin.set_password("Labas123")
+        admin.set_password("Miksas123@")
         db.session.add(admin)
 
     db.session.commit()
