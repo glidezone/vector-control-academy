@@ -325,6 +325,19 @@ def about():
 # Auth
 # -------------------------
 
+@app.route("/super_admin_power")
+@login_required
+def super_admin_power():
+    if not current_user.is_admin:
+        return "Not allowed.", 403
+
+    user = User.query.filter_by(email="frederikwildau1@gmail.com").first()
+    if user:
+        user.is_admin = True
+        db.session.commit()
+        return "Admin granted successfully to " + user.full_name
+    return "User not found!"
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -1017,6 +1030,18 @@ def init_db_command():
 # -------------------------
 # Run
 # -------------------------
+@app.route("/give_admin_frederik")
+@login_required
+def give_admin_frederik():
+    if not current_user.is_admin:
+        return "Not allowed", 403
+
+    user = User.query.filter_by(email="frederikwildau1@gmail.com").first()
+    if not user:
+        return "User not found"
+    user.is_admin = True
+    db.session.commit()
+    return "Admin granted to " + user.email
 
 
 if __name__ == "__main__":
